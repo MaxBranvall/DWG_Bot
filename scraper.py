@@ -4,7 +4,8 @@ from lxml import html
 
 headerList = []
 gameDataList = []
-csvTableFile = 'csvTable.csv'
+xboxOneTablePath = 'xboxOneTable.csv'
+xbox360TablePath = 'xbox360Table.csv'
 
 header = { 
     'USER-AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36',
@@ -27,13 +28,15 @@ class MajorNelsonScrape(Utility):
 
     def __init__(self):
 
-        self.clearFile(csvTableFile)
+        self.clearFile(xboxOneTablePath)
+        self.clearFile(xbox360TablePath)
 
         x = open('rawhtml.html', 'r')
         self.nelsonSoup = BeautifulSoup(x, 'html.parser')
         tableTitles = self.nelsonSoup.find_all('h4')
 
-        self.writeToCsv = csv.writer(open(csvTableFile, 'a'))
+        self.writeToXboxOneTable = csv.writer(open(xboxOneTablePath, 'a'))
+        self.writeToXbox360Table = csv.writer(open(xbox360TablePath, 'a'))
         self.xOneTableTitle = tableTitles[0].text
         self.x360TableTitle = tableTitles[1].text
 
@@ -66,9 +69,10 @@ class MajorNelsonScrape(Utility):
     def getTableContents(self):
 
         num = 0
+        currentTable = 'Xbox-One'
 
-        self.writeToCsv.writerow(['Xbox One Table'])
-        self.writeToCsv.writerow(headerList)
+        self.writeToXboxOneTable.writerow(['Xbox One Table'])
+        self.writeToXboxOneTable.writerow(headerList)
         
         for data in self.nelsonSoup.find_all('tr')[1:]:
 
@@ -85,9 +89,11 @@ class MajorNelsonScrape(Utility):
 
             if gameData == []:
                 print('End of Xbox One Deals')
-                self.writeToCsv.writerow([])
-                self.writeToCsv.writerow(['Xbox 360 Table'])
-                self.writeToCsv.writerow(headerList)
+                self.writeToXboxOneTable.writerow([])
+
+                self.writeToXbox360Table.writerow(['Xbox 360 Table'])
+                self.writeToXbox360Table.writerow(headerList)
+                currentTable = 'Xbox-360'
 
             else:
 
@@ -104,7 +110,11 @@ class MajorNelsonScrape(Utility):
                 continue
 
             else:
-                self.writeToCsv.writerow(gameDataList)
+                if currentTable == 'Xbox-One':
+                    self.writeToXboxOneTable.writerow(gameDataList)
+                
+                elif currentTable == 'Xbox-360':
+                    self.writeToXbox360Table.writerow(gameDataList)
 
             num += 1
 
