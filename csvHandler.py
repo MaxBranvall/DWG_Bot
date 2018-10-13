@@ -1,5 +1,8 @@
 import csv, scraper
 
+writeToXboxOne = csv.writer(open(scraper.xboxOneTablePath, 'w'))
+writeToXbox360 = csv.writer(open(scraper.xbox360TablePath, 'w'))
+
 def main():
 
     xboxOneList = []
@@ -13,6 +16,28 @@ def main():
     
     for row in readXbox360:
         xbox360List.append(row)
+
+    sortLists(xboxOneList, xbox360List)
+
+def sortLists(xOneList, x360List):
+
+    xOneList[2:] = sorted(xOneList[2:])
+    x360List[2:] = sorted(x360List[2:])
+
+    scraper.Utility.clearFile(scraper.xboxOneTablePath)
+    scraper.Utility.clearFile(scraper.xbox360TablePath)
+
+    for line in xOneList:
+        if line == []:
+            pass
+        else:
+            writeToXboxOne.writerow(line)
+
+    for line in x360List:
+        if line == []:
+            pass
+        else:
+            writeToXbox360.writerow(line)
 
 # main()
 

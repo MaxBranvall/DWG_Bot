@@ -20,7 +20,7 @@ trueAchievementsURL = 'https://www.trueachievements.com/game/'
 
 class Utility:
 
-    def clearFile(self, filePath):
+    def clearFile(filePath):
         with open(filePath, 'w') as foo:
             pass
 
@@ -28,8 +28,8 @@ class MajorNelsonScrape(Utility):
 
     def __init__(self):
 
-        self.clearFile(xboxOneTablePath)
-        self.clearFile(xbox360TablePath)
+        Utility.clearFile(xboxOneTablePath)
+        Utility.clearFile(xbox360TablePath)
 
         x = open('rawhtml.html', 'r')
         self.nelsonSoup = BeautifulSoup(x, 'html.parser')
