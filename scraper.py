@@ -31,8 +31,10 @@ class MajorNelsonScrape(Utility):
         Utility.clearFile(xboxOneTablePath)
         Utility.clearFile(xbox360TablePath)
 
-        x = open('rawhtml.html', 'r')
-        self.nelsonSoup = BeautifulSoup(x, 'html.parser')
+        # x = open('rawhtml.html', 'r') #TODO use this to test without making requests
+        x = requests.get(majNelsonURL, headers= header)
+        print(f'Status Code: {x}')
+        self.nelsonSoup = BeautifulSoup(x.text, 'html.parser')
         tableTitles = self.nelsonSoup.find_all('h4')
 
         self.writeToXboxOneTable = csv.writer(open(xboxOneTablePath, 'a'))
@@ -127,5 +129,5 @@ class HowLongToBeatScrape:
 if __name__ == '__main__':
     MajorNelsonScrape()
     csvHandler.main()
-    csvToMdTable.main()
+    csvToMdTable
     print('Success!')

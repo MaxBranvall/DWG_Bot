@@ -30,8 +30,9 @@ def main(mdFile=None):
                 if i == 1:
                     foo.write(horizontal)
             
+            # This will be run for the title of the table
             except IndexError:
-                foo.write(f'{row[0]}\n\n')
+                foo.write(f'\n{row[0]}\n\n')
 
             i += 1
         
@@ -45,10 +46,10 @@ def main(mdFile=None):
                 if i == 1:
                     foo.write(horizontal)
             
+            # Run for the title of the table
             except IndexError:
-                foo.write(f'{row[0]}\n\n')
+                foo.write(f'\n{row[0]}\n\n')
 
             i += 1
-            
 
 main()
