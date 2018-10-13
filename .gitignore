@@ -1,7 +1,5 @@
 *.ini
-*.csv
 *.html
 *.txt
 *.pyc
-testPy.py
-tableTest.py
+

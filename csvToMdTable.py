@@ -5,7 +5,7 @@ def main(csvFile, mdFile=None):
     i = 0
 
     if mdFile == None:
-        mdFileName = ('untitledTable.md')
+        mdFileName = ('csvAndMarkDown/markDownFiles/untitledTable.md')
         with open(mdFileName, 'w'):
             pass
 
