@@ -1,4 +1,4 @@
-import requests, csv, csvHandler
+import requests, csv, csvHandler, csvToMdTable
 from bs4 import BeautifulSoup
 from lxml import html
 
@@ -127,4 +127,5 @@ class HowLongToBeatScrape:
 if __name__ == '__main__':
     MajorNelsonScrape()
     csvHandler.main()
+    csvToMdTable.main()
     print('Success!')

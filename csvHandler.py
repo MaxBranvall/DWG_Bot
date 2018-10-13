@@ -39,7 +39,5 @@ def sortLists(xOneList, x360List):
         else:
             writeToXbox360.writerow(line)
 
-# main()
-
 if __name__ == '__main__':
     main()
