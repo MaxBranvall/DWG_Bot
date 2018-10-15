@@ -40,6 +40,9 @@ def main(mdFile=None):
 
         for row in readXbox360:
 
+            if i == 0:
+                foo.write('-')
+
             try:
                 foo.write(f'{row[0]} | {row[1]} | {row[2]}\n')
 
