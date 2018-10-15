@@ -118,12 +118,10 @@ class Utility:
             discountedPrice = discountedPrice.text
 
             xbox360PriceList.append(discountedPrice)
-            print(f'Retrieved price: {iterationNumber}')
+            print(f'Retrieved price: {iterationNumber}!')
 
             iterationNumber += 1
             breakLoop += 1
-
-        # for line in tableFile, line[-1] = xboxOnePriceList[i] i += 1
 
         openXboxOne = open('finalXboxOneTable.csv', 'w')
         openXbox360 = open('finalXbox360Table.csv', 'w')
@@ -152,8 +150,7 @@ class Utility:
             lineNumber += 1
 
             writeToNewXboxOne.writerow(line)
-            print(line)
-        
+
         lineNumber = 0
         priceIndexNumber = 0
 
@@ -174,9 +171,6 @@ class Utility:
             writeToNewXbox360.writerow(line)
 
         openXboxOne.close()
-        print('\n Price List:')
-        print(xboxOnePriceList)
-        print(xbox360PriceList)
 
 class MajorNelsonScrape(Utility):
 
@@ -247,7 +241,6 @@ class MajorNelsonScrape(Utility):
             gameData = data.find_all('td')
 
             if gameData == []:
-                print('End of Xbox One Deals')
                 self.writeToXboxOneTable.writerow([])
 
                 self.writeToXbox360Table.writerow(['Xbox 360 Table'])
@@ -284,40 +277,6 @@ class TrueAchievementsScrape:
 
 class HowLongToBeatScrape:
     pass
-
-def main():
-    headerList = []
-    gameDataList = []
-    priceRetrievedXboxOne = []
-    priceRetrievedXbox360 = []
-    xboxOnePriceList = []
-    xbox360PriceList = []
-    removeFromPrice = ['with', 'Xbox', 'Live', 'Gold']
-
-    breakLoop = 0
-
-    xboxOneDictionary = {}
-    xbox360Dictionary = {}
-
-    gameRetrieved = False
-    xboxOneTablePath = 'csvAndMarkDown/csvFiles/xboxOneTable.csv'
-    xbox360TablePath = 'csvAndMarkDown/csvFiles/xbox360Table.csv'
-
-    header = { 
-        'USER-AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36',
-    }
-
-    testHeader = {
-        'USER-AGENT' : 'TestBot'
-    }
-
-    majNelsonURL = 'https://majornelson.com/2018/10/08/this-weeks-deals-with-gold-and-spotlight-sale-135/'
-    trueAchievementsURL = 'https://www.trueachievements.com/game/'
-
-    MajorNelsonScrape()
-    csvHandler.main()
-    DWG_BOT.main()
-    print('Success!')
 
 if __name__ == '__main__':
     MajorNelsonScrape()

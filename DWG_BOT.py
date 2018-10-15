@@ -14,10 +14,5 @@ def main():
 
     testSub = redditInstance.subreddit('test')
 
-    # scraper.main()
-
-    print(redditInstance.user.me())
-
     testSub.submit('TestPost', selftext= content)
-
-# main()
+    print('Submitted!')
