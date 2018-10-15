@@ -20,7 +20,6 @@ def main():
     for row in readXbox360:
         xbox360List.append(row)
 
-    scraper.Utility.getGamePrice()
     sortLists(xboxOneList, xbox360List)
 
 def sortLists(xOneList, x360List):
@@ -46,8 +45,8 @@ def sortLists(xOneList, x360List):
     openXboxOne.close()
     openXbox360.close()
 
+    scraper.Utility.getGamePrice()
     csvToMdTable.main()
-    # scraper.MajorNelsonScrape.getGamePrice()
 
 if __name__ == '__main__':
     main()

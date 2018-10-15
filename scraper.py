@@ -9,7 +9,8 @@ headerList = []
 gameDataList = []
 priceRetrievedXboxOne = []
 priceRetrievedXbox360 = []
-priceList = []
+xboxOnePriceList = []
+xbox360PriceList = []
 removeFromPrice = ['with', 'Xbox', 'Live', 'Gold']
 
 breakLoop = 0
@@ -40,10 +41,10 @@ class Utility:
 
     def getGamePrice():
 
-        x = open('rawhtml.html', 'r') #TODO use this to test without making requests
-        # x = requests.get(majNelsonURL, headers= {'USER-AGENT': 'Mozilla 5.0'})
+        # x = open('rawhtml.html', 'r') #TODO use this to test without making requests
+        x = requests.get(majNelsonURL, headers= {'USER-AGENT': 'Mozilla 5.0'})
         # print(f'Status Code: {x}')
-        nelsonSoup = BeautifulSoup(x, 'html.parser')
+        nelsonSoup = BeautifulSoup(x.text, 'html.parser')
 
         i = 0
 
@@ -77,7 +78,7 @@ class Utility:
 
         for game, href in sortedXboxOneDict.items():
 
-            if breakLoop == 1:
+            if breakLoop == 3:
                 break
             
             getStorePage = requests.get(href, headers= header)
@@ -95,13 +96,42 @@ class Utility:
                 if keyword in discountedPrice:
                     discountedPrice.remove(keyword) 
 
-            priceList.append(discountedPrice[0])
+            xboxOnePriceList.append(discountedPrice[0])
             print(f'Retrieved price: {iterationNumber}!')
 
             iterationNumber += 1
             breakLoop += 1
 
-        print(priceList)
+        # for line in tableFile, line[-1] = xboxOnePriceList[i] i += 1
+
+        openXboxOne = open('finalXboxOneTable.csv', 'w')
+        writeToNewXboxOne = csv.writer(openXboxOne)
+
+        readFromXboxOne = csv.reader(open(xboxOneTablePath, 'r'))
+
+        lineNumber = 0
+        priceIndexNumber = 0
+
+        for line in readFromXboxOne:
+
+            if lineNumber == 5:
+                break
+
+            if lineNumber == 0 or lineNumber == 1: # Skip the first two lines
+                pass
+
+            else:
+                line[-1] = xboxOnePriceList[priceIndexNumber]
+            
+                priceIndexNumber += 1
+            lineNumber += 1
+
+            writeToNewXboxOne.writerow(line)
+            print(line)
+
+        openXboxOne.close()
+        print('\n Price List:')
+        print(xboxOnePriceList)
 
 class MajorNelsonScrape(Utility):
 
