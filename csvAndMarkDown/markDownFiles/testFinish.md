@@ -36,9 +36,7 @@ Tropico 5 – Waterborne | Add-On | $2.00
 Unravel Two* | Xbox One X Enhanced | $14.99
 Unravel Yarny Bundle* | Xbox One X Enhanced | $19.49
 Vertical Drop Heroes HD* | Xbox One Game | $3.00
-
 -
-
 Xbox 360 Table
 
 Content Title | Content Type | Price (USD)

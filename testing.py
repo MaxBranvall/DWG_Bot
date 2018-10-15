@@ -1,10 +1,13 @@
 from lxml import html
 from bs4 import BeautifulSoup
 
-x = open('csvAndMarkDown/markDownFiles/grandFinal.md', 'r')
+mdTablePath = 'csvAndMarkDown/markDownFiles/testFinish.md'
+endOfPostPath = 'csvAndMarkDown/markDownFiles/endOfPost.md'
 
-i = 0
+with open(mdTablePath, 'r') as x:
+    mainPost = x.read()
 
-print(x.read())
+with open(endOfPostPath, 'r') as x:
+    ending = x.read()
 
-x.close()
+print(mainPost + ending)

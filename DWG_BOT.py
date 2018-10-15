@@ -5,14 +5,18 @@ import scraper
 
 def main():
 
-    markdownPath = 'csvAndMarkDown/markDownFiles/testFinish.md'
+    mdTablePath = 'csvAndMarkDown/markDownFiles/testFinish.md'
+    endOfPostPath = 'csvAndMarkDown/markDownFiles/endOfPost.md'
 
-    with open(markdownPath, 'r') as x:
-        content = x.read()
+    with open(mdTablePath, 'r') as x:
+        mainPost = x.read()
+
+    with open(endOfPostPath, 'r') as x:
+        ending = x.read()
 
     redditInstance = praw.Reddit('dwgBot')
 
     testSub = redditInstance.subreddit('test')
 
-    testSub.submit('TestPost', selftext= content)
-    print('Submitted!')
+    testSub.submit('Final Test', selftext= mainPost + ending)
+    print('\nSubmitted!')
