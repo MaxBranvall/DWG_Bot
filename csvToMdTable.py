@@ -3,8 +3,8 @@ from datetime import datetime
 
 def main(mdFile=None):
 
-    xboxOneTablePath = 'csvAndMarkDown/csvFiles/xboxOneTable.csv'
-    xbox360TablePath = 'csvAndMarkDown/csvFiles/xbox360Table.csv'
+    xboxOneTablePath = 'finalXboxOneTable.csv'
+    xbox360TablePath = 'finalxbox360Table.csv'
 
     readXboxOne = csv.reader(open(xboxOneTablePath, 'r'))
     readXbox360 = csv.reader(open(xbox360TablePath, 'r'))
