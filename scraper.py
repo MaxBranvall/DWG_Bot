@@ -1,12 +1,21 @@
 import requests, csv, csvHandler, csvToMdTable
+from collections import OrderedDict
 from bs4 import BeautifulSoup
 from lxml import html
 
+# Games now get put in a dictionary with the key being the title and value being the href. Get hrefs from there
+
 headerList = []
 gameDataList = []
-priceRetrieved = []
+priceRetrievedXboxOne = []
+priceRetrievedXbox360 = []
 priceList = []
 removeFromPrice = ['with', 'Xbox', 'Live', 'Gold']
+
+breakLoop = 0
+
+xboxOneDictionary = {}
+xbox360Dictionary = {}
 
 gameRetrieved = False
 xboxOneTablePath = 'csvAndMarkDown/csvFiles/xboxOneTable.csv'
@@ -31,71 +40,68 @@ class Utility:
 
     def getGamePrice():
 
-        # x = open('rawhtml.html', 'r') #TODO use this to test without making requests
-        x = requests.get(majNelsonURL, headers= header)
-        print(f'Status Code: {x}')
-        nelsonSoup = BeautifulSoup(x.text, 'html.parser')
+        x = open('rawhtml.html', 'r') #TODO use this to test without making requests
+        # x = requests.get(majNelsonURL, headers= {'USER-AGENT': 'Mozilla 5.0'})
+        # print(f'Status Code: {x}')
+        nelsonSoup = BeautifulSoup(x, 'html.parser')
 
         i = 0
 
-        for item in nelsonSoup.find_all('a', {'rel': 'noopener'}):
+        for item in nelsonSoup.find_all(['tr', 'td', 'a'], {'rel': 'noopener'}):
 
-            if i == 3:
+            if i == 100:
                 break
 
-            x = item['href']
-
-            if x not in priceRetrieved:
-                gameRetrieved = False
-                priceRetrieved.append(x)
-                print(x)
-
-            else:
-                gameRetrieved = True
+            if item.text == '':
                 pass
-
-            if 'microsoft' not in x:
-                if i >= 1:
-                    print(True)
+            else:
+                if item.text not in xboxOneDictionary.keys():
+                    xboxOneDictionary[item.text] = item['href']
                 else:
-                    print('\n')
-                    print(True)
+                    pass
+
+        for k, v in xboxOneDictionary.items():
+            if 'microsoft' not in v:
+                gameRetrieved = False
+                xbox360Dictionary[k] = v
+
+        for k in xbox360Dictionary.keys():
+            if k in xboxOneDictionary:
+                del xboxOneDictionary[k]
                 
-                i += 1
+        sortedXboxOneDict = OrderedDict(sorted(xboxOneDictionary.items()))
+        sortedXbox360Dict = OrderedDict(sorted(xbox360Dictionary.items()))
 
-            if gameRetrieved == False:
+        breakLoop = 0
+        iterationNumber = 0
 
-                getBuyPage = requests.get(x, headers= testHeader) #TODO Not testing
-                buyPageSoup = BeautifulSoup(getBuyPage.text, 'html.parser') #TODO Not testing
+        for game, href in sortedXboxOneDict.items():
 
-                # x = open('buyHtml.html', 'r')#TODO testing
-                # buyPageSoup = BeautifulSoup(x, 'html.parser') #TODO testing
+            if breakLoop == 1:
+                break
+            
+            getStorePage = requests.get(href, headers= header)
+            storePageSoup = BeautifulSoup(getStorePage.text, 'html.parser')
 
-                try:
-                    discountedPrice = buyPageSoup.find('div', {'class': 'remediation-cta-label'})
-                    discountedPrice = discountedPrice.text.split()
+            try:
+                discountedPrice = storePageSoup.find('div', {'class': 'remediation-cta-label'})
+                discountedPrice = discountedPrice.text.split()
 
-                except AttributeError: #This block is executed if the landing page is different
-                    discountedPrice = buyPageSoup.find('span', {'class': 'price-disclaimer'})
-                    discountedPrice = discountedPrice.find('span').text.split()
+            except AttributeError:
+                discountedPrice = storePageSoup.find('span', {'class': 'price-disclaimer'})
+                discountedPrice = discountedPrice.find('span').text.split()
 
-                for item in removeFromPrice:
-                    if item in discountedPrice:
-                        discountedPrice.remove(item)
+            for keyword in removeFromPrice:
+                if keyword in discountedPrice:
+                    discountedPrice.remove(keyword) 
 
-                priceList.append(discountedPrice[0])
+            priceList.append(discountedPrice[0])
+            print(f'Retrieved price: {iterationNumber}!')
 
-            else:
-                pass
+            iterationNumber += 1
+            breakLoop += 1
 
-            i += 1
-
-            print(priceList)
-            print(priceRetrieved)
-
-        # for item in csv.reader(open(xboxOneTablePath, 'r')):
-        #     print(item)
-
+        print(priceList)
 
 class MajorNelsonScrape(Utility):
 
@@ -192,6 +198,8 @@ class MajorNelsonScrape(Utility):
                     self.writeToXbox360Table.writerow(gameDataList)
 
             num += 1
+        
+        # csvHandler.main()
 
 class TrueAchievementsScrape:
     pass
@@ -202,62 +210,4 @@ class HowLongToBeatScrape:
 if __name__ == '__main__':
     MajorNelsonScrape()
     csvHandler.main()
-    csvToMdTable
     print('Success!')
-
-
-# def getGamePrice(self):
-
-#         i = 0
-
-#         for item in self.nelsonSoup.find_all('a', {'rel': 'noopener'}):
-
-#             if i == 8:
-#                 break
-
-#             x = (item['href'])
-
-#             if x not in priceRetrieved:
-#                 gameRetrieved = False
-#                 priceRetrieved.append(x)
-#                 print(x)
-
-#             else:
-#                 gameRetrieved = True
-#                 pass
-
-#             if 'microsoft' not in x:
-#                 if i >= 1:
-#                     print(True)
-#                 else:
-#                     print('\n')
-#                     print(True)
-                
-#                 i += 1
-            
-#             if gameRetrieved == False:
-
-#                 getBuyPage = requests.get(x, headers= testHeader) #TODO Not testing
-#                 buyPageSoup = BeautifulSoup(getBuyPage.text, 'html.parser') #TODO Not testing
-
-#                 # x = open('buyHtml.html', 'r')#TODO testing
-#                 # buyPageSoup = BeautifulSoup(x, 'html.parser') #TODO testing
-
-#                 try:
-#                     discountedPrice = buyPageSoup.find('div', {'class': 'remediation-cta-label'})
-#                     discountedPrice = discountedPrice.text.split()
-
-#                 except AttributeError: #This block is executed if the landing page is different
-#                     discountedPrice = buyPageSoup.find('span', {'class': 'price-disclaimer'})
-#                     discountedPrice = discountedPrice.find('span').text.split()
-
-#                 for item in removeFromPrice:
-#                     if item in discountedPrice:
-#                         discountedPrice.remove(item)
-
-#                 print(discountedPrice[0])
-
-#             else:
-#                 pass
-
-#             i += 1

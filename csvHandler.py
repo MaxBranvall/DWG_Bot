@@ -1,4 +1,4 @@
-import csv, scraper
+import csv, scraper, csvToMdTable
 
 writeToXboxOne = csv.writer(open(scraper.xboxOneTablePath, 'w'))
 writeToXbox360 = csv.writer(open(scraper.xbox360TablePath, 'w'))
@@ -40,6 +40,7 @@ def sortLists(xOneList, x360List):
         else:
             writeToXbox360.writerow(line)
 
+    csvToMdTable.main()
     # scraper.MajorNelsonScrape.getGamePrice()
 
 if __name__ == '__main__':
