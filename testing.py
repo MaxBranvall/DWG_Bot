@@ -1,16 +1,10 @@
 from lxml import html
 from bs4 import BeautifulSoup
 
-qwer = 'x360store.html'
+x = open('csvAndMarkDown/markDownFiles/grandFinal.md', 'r')
 
-url = open('x360store.html', 'r')
+i = 0
 
-x = BeautifulSoup(url, 'html.parser')
+print(x.read())
 
-# foo = x.xpath('//*[@id="gameDetails"]/h1/text()')
-
-foo = x.find('span', {'class': 'GoldPrice ProductPrice'})
-
-print(foo)
-
-# openUrl.close()
+x.close()

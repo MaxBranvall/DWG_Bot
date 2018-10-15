@@ -1,4 +1,5 @@
 import requests, csv, csvHandler, csvToMdTable
+import DWG_BOT
 from collections import OrderedDict
 from bs4 import BeautifulSoup
 from lxml import html
@@ -78,7 +79,7 @@ class Utility:
 
         for game, href in sortedXboxOneDict.items():
 
-            if breakLoop == 3:
+            if breakLoop == 100:
                 break
             
             getStorePage = requests.get(href, headers= header)
@@ -107,7 +108,7 @@ class Utility:
 
         for game, href in sortedXbox360Dict.items():
 
-            if breakLoop == 3:
+            if breakLoop == 100:
                 break
          
             getStorePage = requests.get(href, headers= header)
@@ -138,7 +139,7 @@ class Utility:
 
         for line in readFromXboxOne:
 
-            if lineNumber == 5:
+            if lineNumber == 100:
                 break
 
             if lineNumber == 0 or lineNumber == 1: # Skip the first two lines
@@ -158,7 +159,7 @@ class Utility:
 
         for line in readFromXbox360:
 
-            if lineNumber == 5:
+            if lineNumber == 100:
                 break
 
             if lineNumber == 0 or lineNumber == 1:
@@ -215,7 +216,10 @@ class MajorNelsonScrape(Utility):
                     if i == 3:
                         break
                     else:
-                        headerList.append(item.text)
+                        if item.text == 'Discount':
+                            headerList.append('Price (USD)')
+                        else:
+                            headerList.append(item.text)
                     i += 1
             break
 
@@ -281,7 +285,42 @@ class TrueAchievementsScrape:
 class HowLongToBeatScrape:
     pass
 
+def main():
+    headerList = []
+    gameDataList = []
+    priceRetrievedXboxOne = []
+    priceRetrievedXbox360 = []
+    xboxOnePriceList = []
+    xbox360PriceList = []
+    removeFromPrice = ['with', 'Xbox', 'Live', 'Gold']
+
+    breakLoop = 0
+
+    xboxOneDictionary = {}
+    xbox360Dictionary = {}
+
+    gameRetrieved = False
+    xboxOneTablePath = 'csvAndMarkDown/csvFiles/xboxOneTable.csv'
+    xbox360TablePath = 'csvAndMarkDown/csvFiles/xbox360Table.csv'
+
+    header = { 
+        'USER-AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36',
+    }
+
+    testHeader = {
+        'USER-AGENT' : 'TestBot'
+    }
+
+    majNelsonURL = 'https://majornelson.com/2018/10/08/this-weeks-deals-with-gold-and-spotlight-sale-135/'
+    trueAchievementsURL = 'https://www.trueachievements.com/game/'
+
+    MajorNelsonScrape()
+    csvHandler.main()
+    DWG_BOT.main()
+    print('Success!')
+
 if __name__ == '__main__':
     MajorNelsonScrape()
     csvHandler.main()
+    DWG_BOT.main()
     print('Success!')

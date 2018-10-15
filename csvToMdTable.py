@@ -13,7 +13,7 @@ def main(mdFile=None):
     # Create a markDown file if none is specified
     if mdFile == None:
         mdFileName = (f'{now.hour - 12}:{now.minute}.{now.second}.md')
-        mdFilePath = (f'csvAndMarkDown/markDownFiles/{mdFileName}')
+        mdFilePath = (f'csvAndMarkDown/markDownFiles/testFinish.md')
         with open(mdFilePath, 'w'):
             pass
 

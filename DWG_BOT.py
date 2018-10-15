@@ -3,23 +3,21 @@ from lxml import html
 import praw
 import scraper
 
-redditInstance = praw.Reddit('dwgBot')
+def main():
 
-testSub = redditInstance.subreddit('test')
+    markdownPath = 'csvAndMarkDown/markDownFiles/testFinish.md'
 
-# scraper.main()
+    with open(markdownPath, 'r') as x:
+        content = x.read()
 
-print(redditInstance.user.me())
+    redditInstance = praw.Reddit('dwgBot')
 
-# testSub.submit('FormatTest2', selftext= '**This is bold**, *These are italics*,\
-# `this is inline code`,\
-# Col1 | Col2\n\
-# ---|---\n\
-# row | row')
+    testSub = redditInstance.subreddit('test')
 
-# for sub in testSub.stream.submissions():
-#     if sub.title == 'FormatTest2':
-#         sub.reply('col1 | col2\n\
-# ---|---\n\
-# row | row')
-#         break
+    # scraper.main()
+
+    print(redditInstance.user.me())
+
+    testSub.submit('TestPost', selftext= content)
+
+# main()
