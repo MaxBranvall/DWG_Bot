@@ -15,6 +15,8 @@ removeFromPrice = ['with', 'Xbox', 'Live', 'Gold']
 
 xboxOneTablePath = 'csvAndMarkDown/csvFiles/xboxOneTable.csv'
 xbox360TablePath = 'csvAndMarkDown/csvFiles/xbox360Table.csv'
+finalXboxOneTablePath = 'csvAndMarkDown/csvFiles/finalXboxOneTable.csv'
+finalXbox360TablePath = 'csvAndMarkDown/csvFiles/finalXbox360Table.csv'
 
 header = { 'USER-AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36'}
 testHeader = {'USER-AGENT' : 'TestBot'}
@@ -25,7 +27,7 @@ testUrl = 'rawhtml.html'
 
 # Debugging
 breakForDebug = 100
-debugMode = True
+debugMode = False
 
 class Utility:
 
@@ -62,54 +64,14 @@ class Utility:
         Utility.getXboxOnePrices(xboxOneDict)
         Utility.getXbox360Prices(xbox360Dict)
 
-        openXboxOne = open('finalXboxOneTable.csv', 'w')
-        openXbox360 = open('finalXbox360Table.csv', 'w')
+        openXboxOne, writeToXboxOne, readFromXboxOne = Utility.xboxOneFiles()
+        openXbox360, writeToXbox360, readFromXbox360 = Utility.xbox360Files()
 
-        writeToNewXboxOne = csv.writer(openXboxOne)
-        writeToNewXbox360 = csv.writer(openXbox360)
-
-        readFromXboxOne = csv.reader(open(xboxOneTablePath, 'r'))
-        readFromXbox360 = csv.reader(open(xbox360TablePath, 'r'))
-
-        lineNumber = 0
-        priceIndexNumber = 0
-
-        for line in readFromXboxOne:
-
-            if lineNumber == 100:
-                break
-
-            if lineNumber == 0 or lineNumber == 1: # Skip the first two lines
-                pass
-
-            else:
-                line[-1] = xboxOnePriceList[priceIndexNumber]
-            
-                priceIndexNumber += 1
-            lineNumber += 1
-
-            writeToNewXboxOne.writerow(line)
-
-        lineNumber = 0
-        priceIndexNumber = 0
-
-        for line in readFromXbox360:
-
-            if lineNumber == 100:
-                break
-
-            if lineNumber == 0 or lineNumber == 1:
-                pass
-            
-            else:
-                line[-1] = xbox360PriceList[priceIndexNumber]
-
-                priceIndexNumber += 1
-            lineNumber += 1
-
-            writeToNewXbox360.writerow(line)
+        Utility.addPricesToXboxOneTable(readFromXboxOne, writeToXboxOne)
+        Utility.addPricesToXbox360Table(readFromXbox360, writeToXbox360)
 
         openXboxOne.close()
+        openXbox360.close()
 
     def processAnchorTags(nelsonSoup):
 
@@ -190,6 +152,70 @@ class Utility:
 
             priceIterationNumber += 1
             debugLoopBreak += 1
+    
+    def xboxOneFiles():
+
+        openXboxOne = open('finalXboxOneTable.csv', 'w')
+        writeToXboxOne = csv.writer(openXboxOne)
+        readFromXboxOne = csv.reader(open(xboxOneTablePath, 'r'))
+
+        return openXboxOne, writeToXboxOne, readFromXboxOne
+
+    def xbox360Files():
+
+        openXbox360 = open('finalXbox360Table.csv', 'w')
+        writeToXbox360 = csv.writer(openXbox360)
+        readFromXbox360 = csv.reader(open(xbox360TablePath, 'r'))
+
+        return openXbox360, writeToXbox360, readFromXbox360
+
+    def addPricesToXboxOneTable(readFromXboxOne, writeToXboxOne):
+        
+        debugLoopBreak = 0
+        lineNumber = 0
+        priceIndexNumber = 0
+
+        for line in readFromXboxOne:
+
+            if debugLoopBreak == breakForDebug:
+                break
+
+            if lineNumber == 0 or lineNumber == 1: # Skip the first two lines
+                pass
+
+            else:
+                # For each price in the priceList, assign price to last index of each line
+                line[-1] = xboxOnePriceList[priceIndexNumber]
+            
+                priceIndexNumber += 1
+            lineNumber += 1
+            debugLoopBreak += 1
+
+            writeToXboxOne.writerow(line)
+
+    def addPricesToXbox360Table(readFromXbox360, writeToXbox360):
+
+        debugLoopBreak = 0
+        lineNumber = 0
+        priceIndexNumber = 0
+
+        for line in readFromXbox360:
+
+            if debugLoopBreak == breakForDebug:
+                break
+
+            if lineNumber == 0 or lineNumber == 1:
+                pass
+            
+            else:
+                # For each price in the priceList, assign price to last index of each line
+                line[-1] = xbox360PriceList[priceIndexNumber]
+
+                priceIndexNumber += 1
+            lineNumber += 1
+            debugLoopBreak += 1
+
+            writeToXbox360.writerow(line)
 
 class MajorNelsonScrape:
 
