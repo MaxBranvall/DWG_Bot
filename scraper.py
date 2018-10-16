@@ -97,7 +97,7 @@ class Utility:
                 if keyword in discountedPrice:
                     discountedPrice.remove(keyword) 
 
-            xboxOnePriceList.append(discountedPrice[0])
+            xboxOnePriceList.append(f'[{discountedPrice[0]}]({href})')
             print(f'Retrieved price: {iterationNumber}!')
 
             iterationNumber += 1
@@ -117,7 +117,7 @@ class Utility:
             discountedPrice = storePageSoup.find('span', {'class': 'GoldPrice ProductPrice'})
             discountedPrice = discountedPrice.text
 
-            xbox360PriceList.append(discountedPrice)
+            xbox360PriceList.append(f'[{discountedPrice}]({href})')
             print(f'Retrieved price: {iterationNumber}!')
 
             iterationNumber += 1
