@@ -4,35 +4,27 @@ from collections import OrderedDict
 from bs4 import BeautifulSoup
 from lxml import html
 
-# Games now get put in a dictionary with the key being the title and value being the href. Get hrefs from there
+xboxOneDictionary = {}
+xbox360Dictionary = {}
 
 headerList = []
 gameDataList = []
-priceRetrievedXboxOne = []
-priceRetrievedXbox360 = []
 xboxOnePriceList = []
 xbox360PriceList = []
 removeFromPrice = ['with', 'Xbox', 'Live', 'Gold']
 
-breakLoop = 0
-
-xboxOneDictionary = {}
-xbox360Dictionary = {}
-
-gameRetrieved = False
 xboxOneTablePath = 'csvAndMarkDown/csvFiles/xboxOneTable.csv'
 xbox360TablePath = 'csvAndMarkDown/csvFiles/xbox360Table.csv'
 
-header = { 
-    'USER-AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36',
-}
-
-testHeader = {
-    'USER-AGENT' : 'TestBot'
-}
+header = { 'USER-AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36'}
+testHeader = {'USER-AGENT' : 'TestBot'}
 
 majNelsonURL = 'https://majornelson.com/2018/10/08/this-weeks-deals-with-gold-and-spotlight-sale-135/'
 trueAchievementsURL = 'https://www.trueachievements.com/game/'
+testUrl = 'rawhtml.html'
+
+breakLoop = 0
+debugMode = True
 
 class Utility:
 
@@ -40,12 +32,22 @@ class Utility:
         with open(filePath, 'w') as foo:
             pass
 
+    def retrieveMajorNelsonPage():
+
+        if debugMode == True:
+            x = open(testUrl, 'r')
+            nelsonSoup = BeautifulSoup(x, 'html.parser')
+            return nelsonSoup
+
+        else:
+            x = requests.get(majNelsonURL, headers= {'USER-AGENT': 'Mozilla 5.0'})
+            print(f'Status Code: {x}')
+            nelsonSoup = BeautifulSoup(x.text, 'html.parser')
+            return nelsonSoup
+
     def getGamePrice():
 
-        x = open('rawhtml.html', 'r') #TODO use this to test without making requests
-        # x = requests.get(majNelsonURL, headers= {'USER-AGENT': 'Mozilla 5.0'})
-        # print(f'Status Code: {x}')
-        nelsonSoup = BeautifulSoup(x, 'html.parser')
+        nelsonSoup = Utility.retrieveMajorNelsonPage()
 
         i = 0
 
@@ -64,7 +66,6 @@ class Utility:
 
         for k, v in xboxOneDictionary.items():
             if 'microsoft' not in v:
-                gameRetrieved = False
                 xbox360Dictionary[k] = v
 
         for k in xbox360Dictionary.keys():
@@ -176,101 +177,90 @@ class MajorNelsonScrape(Utility):
 
     def __init__(self):
 
+        # Clear files
         Utility.clearFile(xboxOneTablePath)
         Utility.clearFile(xbox360TablePath)
 
-        x = open('rawhtml.html', 'r') #TODO use this to test without making requests
-        # x = requests.get(majNelsonURL, headers= header)
-        # print(f'Status Code: {x}')
-        self.nelsonSoup = BeautifulSoup(x, 'html.parser')
-        tableTitles = self.nelsonSoup.find_all('h4')
+        # Send a request.get to major nelson post
+        self.nelsonSoup = Utility.retrieveMajorNelsonPage()
 
         self.writeToXboxOneTable = csv.writer(open(xboxOneTablePath, 'a'))
         self.writeToXbox360Table = csv.writer(open(xbox360TablePath, 'a'))
-        self.xOneTableTitle = tableTitles[0].text
-        self.x360TableTitle = tableTitles[1].text
+
+        self.currentTable = 'Xbox-One'
 
         self.getTableHeaders()
 
     def getTableHeaders(self):
+
+        headerNumber = 0
         
-        for data in self.nelsonSoup.find_all('tr'):
+        for row in self.nelsonSoup.find_all('tr'):
 
             headerList.clear()
-            tableHeader = data.find_all('th')
+            tableHeaders = row.find_all('th')
 
-            if tableHeader == []:
-                continue
+            for header in tableHeaders:
 
-            else:
+                # Stops 'Notes' header from being added to the table
+                if headerNumber == 3: 
+                    break
 
-                i = 0
-                for item in tableHeader:
-
-                    if i == 3:
-                        break
+                else:
+                    if header.text == 'Discount':
+                        headerList.append('Price (USD)')
                     else:
-                        if item.text == 'Discount':
-                            headerList.append('Price (USD)')
-                        else:
-                            headerList.append(item.text)
-                    i += 1
+                        headerList.append(header.text)
+
+                headerNumber += 1
             break
 
         self.getTableContents()
 
     def getTableContents(self):
 
-        num = 0
-        currentTable = 'Xbox-One'
-
         self.writeToXboxOneTable.writerow(['Xbox One Table'])
         self.writeToXboxOneTable.writerow(headerList)
         
-        for data in self.nelsonSoup.find_all('tr')[1:]:
+        for row in self.nelsonSoup.find_all('tr')[1:]:
 
-            try:
-                if num == 100:
-                    break
-
-            except IndexError:
-                break
-
+            # Clear list on each iteration to prevent dupe writing
             gameDataList.clear()
 
-            gameData = data.find_all('td')
+            gameData = row.find_all('td')
 
+            # Detects when XboxOne table ends
             if gameData == []:
                 self.writeToXboxOneTable.writerow([])
 
                 self.writeToXbox360Table.writerow(['Xbox 360 Table'])
                 self.writeToXbox360Table.writerow(headerList)
-                currentTable = 'Xbox-360'
+                self.currentTable = 'Xbox-360'
 
+            # If table is still Xbox-One
             else:
 
-                i = 0
+                itemNumber = 0
                 for item in gameData:
 
-                    if i == 3:
+                    # Breaks before writing 'Notes' column to list
+                    if itemNumber == 3:
                         break
+
                     else:
                         gameDataList.append(item.text)
-                    i += 1
+                    itemNumber += 1
             
-            if gameDataList == []:
-                continue
+            self.writeToTable(gameDataList)
 
-            else:
-                if currentTable == 'Xbox-One':
-                    self.writeToXboxOneTable.writerow(gameDataList)
-                
-                elif currentTable == 'Xbox-360':
-                    self.writeToXbox360Table.writerow(gameDataList)
+    def writeToTable(self, gameData):
 
-            num += 1
+        if self.currentTable == 'Xbox-One':
+            self.writeToXboxOneTable.writerow(gameData)
         
-        # csvHandler.main()
+        else:
+            self.writeToXbox360Table.writerow(gameData)
+        
 
 class TrueAchievementsScrape:
     pass
@@ -281,5 +271,5 @@ class HowLongToBeatScrape:
 if __name__ == '__main__':
     MajorNelsonScrape()
     csvHandler.main()
-    DWG_BOT.main()
+    # DWG_BOT.main()
     print('\nSuccess!')
