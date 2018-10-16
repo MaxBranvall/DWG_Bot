@@ -1,38 +1,33 @@
-import requests, csv, csvHandler, csvToMdTable
-import DWG_BOT
+import requests, csv
+import csvHandler, csvToMdTable, DWG_BOT
 from collections import OrderedDict
 from bs4 import BeautifulSoup
-from lxml import html
 
-# Games now get put in a dictionary with the key being the title and value being the href. Get hrefs from there
+initialDictionary = {}
+xboxOneDictionary = {}
+xbox360Dictionary = {}
 
 headerList = []
 gameDataList = []
-priceRetrievedXboxOne = []
-priceRetrievedXbox360 = []
 xboxOnePriceList = []
 xbox360PriceList = []
 removeFromPrice = ['with', 'Xbox', 'Live', 'Gold']
 
-breakLoop = 0
-
-xboxOneDictionary = {}
-xbox360Dictionary = {}
-
-gameRetrieved = False
 xboxOneTablePath = 'csvAndMarkDown/csvFiles/xboxOneTable.csv'
 xbox360TablePath = 'csvAndMarkDown/csvFiles/xbox360Table.csv'
+finalXboxOneTablePath = 'csvAndMarkDown/csvFiles/finalXboxOneTable.csv'
+finalXbox360TablePath = 'csvAndMarkDown/csvFiles/finalXbox360Table.csv'
 
-header = { 
-    'USER-AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36',
-}
-
-testHeader = {
-    'USER-AGENT' : 'TestBot'
-}
+header = { 'USER-AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36'}
+testHeader = {'USER-AGENT' : 'TestBot'}
 
 majNelsonURL = 'https://majornelson.com/2018/10/08/this-weeks-deals-with-gold-and-spotlight-sale-135/'
 trueAchievementsURL = 'https://www.trueachievements.com/game/'
+testUrl = 'rawhtml.html'
+
+# Debugging
+breakForDebug = 100
+debugMode = False
 
 class Utility:
 
@@ -40,50 +35,84 @@ class Utility:
         with open(filePath, 'w') as foo:
             pass
 
+    def requestWebPage(mode=None, href=None):
+
+        if mode == 'getPrice':
+            getStorePage = requests.get(href, headers= header)
+            storePageSoup = BeautifulSoup(getStorePage.text, 'html.parser')
+            return storePageSoup            
+
+        else:
+            if debugMode == True:
+                x = open(testUrl, 'r')
+                nelsonSoup = BeautifulSoup(x, 'html.parser')
+                return nelsonSoup
+
+            else:
+                x = requests.get(majNelsonURL, headers= {'USER-AGENT': 'Mozilla 5.0'})
+                print(f'Status Code: {x}')
+                nelsonSoup = BeautifulSoup(x.text, 'html.parser')
+                return nelsonSoup
+
     def getGamePrice():
 
-        x = open('rawhtml.html', 'r') #TODO use this to test without making requests
-        # x = requests.get(majNelsonURL, headers= {'USER-AGENT': 'Mozilla 5.0'})
-        # print(f'Status Code: {x}')
-        nelsonSoup = BeautifulSoup(x, 'html.parser')
+        nelsonSoup = Utility.requestWebPage()
 
-        i = 0
+        Utility.processAnchorTags(nelsonSoup)
+        xboxOneDict, xbox360Dict = Utility.sortDictionaries()
 
-        for item in nelsonSoup.find_all(['tr', 'td', 'a'], {'rel': 'noopener'}):
+        Utility.getXboxOnePrices(xboxOneDict)
+        Utility.getXbox360Prices(xbox360Dict)
 
-            if i == 100:
-                break
+        openXboxOne, writeToXboxOne, readFromXboxOne = Utility.xboxOneFiles()
+        openXbox360, writeToXbox360, readFromXbox360 = Utility.xbox360Files()
 
-            if item.text == '':
+        Utility.addPricesToXboxOneTable(readFromXboxOne, writeToXboxOne)
+        Utility.addPricesToXbox360Table(readFromXbox360, writeToXbox360)
+
+        openXboxOne.close()
+        openXbox360.close()
+
+    def processAnchorTags(nelsonSoup):
+
+        for anchorTag in nelsonSoup.find_all(['tr', 'td', 'a'], {'rel': 'noopener'}):
+
+            # First few a tags have no text, this skips those
+            if anchorTag.text == '':
                 pass
+
+            # if the text has been added to the dict, pass, if not, add the game name with its href
             else:
-                if item.text not in xboxOneDictionary.keys():
-                    xboxOneDictionary[item.text] = item['href']
+                if anchorTag.text not in initialDictionary.keys():
+                    initialDictionary[anchorTag.text] = anchorTag['href']
                 else:
                     pass
 
-        for k, v in xboxOneDictionary.items():
-            if 'microsoft' not in v:
-                gameRetrieved = False
-                xbox360Dictionary[k] = v
+    def sortDictionaries():
 
-        for k in xbox360Dictionary.keys():
-            if k in xboxOneDictionary:
-                del xboxOneDictionary[k]
-                
+        for game, href in initialDictionary.items():
+
+            if 'microsoft' not in href:
+                xbox360Dictionary[game] = href
+            else:
+                xboxOneDictionary[game] = href
+
         sortedXboxOneDict = OrderedDict(sorted(xboxOneDictionary.items()))
         sortedXbox360Dict = OrderedDict(sorted(xbox360Dictionary.items()))
 
-        breakLoop = 0
-        iterationNumber = 0
+        return sortedXboxOneDict, sortedXbox360Dict
 
-        for game, href in sortedXboxOneDict.items():
+    def getXboxOnePrices(xboxOneDict):
+    
+        debugLoopBreak = 0
+        priceIterationNumber = 0
 
-            if breakLoop == 100:
+        for game, href in xboxOneDict.items():
+
+            if debugLoopBreak == breakForDebug:
                 break
             
-            getStorePage = requests.get(href, headers= header)
-            storePageSoup = BeautifulSoup(getStorePage.text, 'html.parser')
+            storePageSoup = Utility.requestWebPage(mode='getPrice', href=href)
 
             try:
                 discountedPrice = storePageSoup.find('div', {'class': 'remediation-cta-label'})
@@ -98,179 +127,187 @@ class Utility:
                     discountedPrice.remove(keyword) 
 
             xboxOnePriceList.append(f'[{discountedPrice[0]}]({href})')
-            print(f'Retrieved price: {iterationNumber}!')
+            print(f'(X1) Retrieved price: {priceIterationNumber}!')
 
-            iterationNumber += 1
-            breakLoop += 1
-        
-        breakLoop = 0
-        iterationNumber = 0
+            priceIterationNumber += 1
+            debugLoopBreak += 1
+    
+    def getXbox360Prices(xbox360Dict):
 
-        for game, href in sortedXbox360Dict.items():
+        debugLoopBreak = 0
+        priceIterationNumber = 0
 
-            if breakLoop == 100:
+        for game, href in xbox360Dict.items():
+
+            if debugLoopBreak == breakForDebug:
                 break
-         
-            getStorePage = requests.get(href, headers= header)
-            storePageSoup = BeautifulSoup(getStorePage.text, 'html.parser')
+
+            storePageSoup = Utility.requestWebPage(mode='getPrice', href=href)
 
             discountedPrice = storePageSoup.find('span', {'class': 'GoldPrice ProductPrice'})
             discountedPrice = discountedPrice.text
 
             xbox360PriceList.append(f'[{discountedPrice}]({href})')
-            print(f'Retrieved price: {iterationNumber}!')
+            print(f'(X360) Retrieved price: {priceIterationNumber}!')
 
-            iterationNumber += 1
-            breakLoop += 1
+            priceIterationNumber += 1
+            debugLoopBreak += 1
+    
+    def xboxOneFiles():
 
         openXboxOne = open('finalXboxOneTable.csv', 'w')
-        openXbox360 = open('finalXbox360Table.csv', 'w')
-
-        writeToNewXboxOne = csv.writer(openXboxOne)
-        writeToNewXbox360 = csv.writer(openXbox360)
-
+        writeToXboxOne = csv.writer(openXboxOne)
         readFromXboxOne = csv.reader(open(xboxOneTablePath, 'r'))
+
+        return openXboxOne, writeToXboxOne, readFromXboxOne
+
+    def xbox360Files():
+
+        openXbox360 = open('finalXbox360Table.csv', 'w')
+        writeToXbox360 = csv.writer(openXbox360)
         readFromXbox360 = csv.reader(open(xbox360TablePath, 'r'))
 
+        return openXbox360, writeToXbox360, readFromXbox360
+
+    def addPricesToXboxOneTable(readFromXboxOne, writeToXboxOne):
+        
+        debugLoopBreak = 0
         lineNumber = 0
         priceIndexNumber = 0
 
         for line in readFromXboxOne:
 
-            if lineNumber == 100:
+            if debugLoopBreak == breakForDebug:
                 break
 
             if lineNumber == 0 or lineNumber == 1: # Skip the first two lines
                 pass
 
             else:
+                # For each price in the priceList, assign price to last index of each line
                 line[-1] = xboxOnePriceList[priceIndexNumber]
             
                 priceIndexNumber += 1
             lineNumber += 1
+            debugLoopBreak += 1
 
-            writeToNewXboxOne.writerow(line)
+            writeToXboxOne.writerow(line)
 
+    def addPricesToXbox360Table(readFromXbox360, writeToXbox360):
+
+        debugLoopBreak = 0
         lineNumber = 0
         priceIndexNumber = 0
 
         for line in readFromXbox360:
 
-            if lineNumber == 100:
+            if debugLoopBreak == breakForDebug:
                 break
 
             if lineNumber == 0 or lineNumber == 1:
                 pass
             
             else:
+                # For each price in the priceList, assign price to last index of each line
                 line[-1] = xbox360PriceList[priceIndexNumber]
 
                 priceIndexNumber += 1
             lineNumber += 1
+            debugLoopBreak += 1
 
-            writeToNewXbox360.writerow(line)
+            writeToXbox360.writerow(line)
 
-        openXboxOne.close()
-
-class MajorNelsonScrape(Utility):
+class MajorNelsonScrape:
 
     def __init__(self):
 
+        # Clear files
         Utility.clearFile(xboxOneTablePath)
         Utility.clearFile(xbox360TablePath)
 
-        x = open('rawhtml.html', 'r') #TODO use this to test without making requests
-        # x = requests.get(majNelsonURL, headers= header)
-        # print(f'Status Code: {x}')
-        self.nelsonSoup = BeautifulSoup(x, 'html.parser')
-        tableTitles = self.nelsonSoup.find_all('h4')
+        # Send a request.get to major nelson post
+        self.nelsonSoup = Utility.requestWebPage()
 
         self.writeToXboxOneTable = csv.writer(open(xboxOneTablePath, 'a'))
         self.writeToXbox360Table = csv.writer(open(xbox360TablePath, 'a'))
-        self.xOneTableTitle = tableTitles[0].text
-        self.x360TableTitle = tableTitles[1].text
+
+        self.currentTable = 'Xbox-One'
 
         self.getTableHeaders()
 
     def getTableHeaders(self):
+
+        headerNumber = 0
         
-        for data in self.nelsonSoup.find_all('tr'):
+        for row in self.nelsonSoup.find_all('tr'):
 
             headerList.clear()
-            tableHeader = data.find_all('th')
+            tableHeaders = row.find_all('th')
 
-            if tableHeader == []:
-                continue
+            for header in tableHeaders:
 
-            else:
+                # Stops 'Notes' header from being added to the table
+                if headerNumber == 3: 
+                    break
 
-                i = 0
-                for item in tableHeader:
-
-                    if i == 3:
-                        break
+                else:
+                    if header.text == 'Discount':
+                        headerList.append('Price (USD)')
                     else:
-                        if item.text == 'Discount':
-                            headerList.append('Price (USD)')
-                        else:
-                            headerList.append(item.text)
-                    i += 1
+                        headerList.append(header.text)
+
+                headerNumber += 1
             break
 
         self.getTableContents()
 
     def getTableContents(self):
 
-        num = 0
-        currentTable = 'Xbox-One'
-
+        # Initialize xbox one table
         self.writeToXboxOneTable.writerow(['Xbox One Table'])
         self.writeToXboxOneTable.writerow(headerList)
         
-        for data in self.nelsonSoup.find_all('tr')[1:]:
+        for row in self.nelsonSoup.find_all('tr')[1:]:
 
-            try:
-                if num == 100:
-                    break
-
-            except IndexError:
-                break
-
+            # Clear list on each iteration to prevent dupe writing
             gameDataList.clear()
 
-            gameData = data.find_all('td')
+            gameData = row.find_all('td')
 
+            # Detects when XboxOne table ends
             if gameData == []:
+
+                self.currentTable = 'Xbox-360'
+
                 self.writeToXboxOneTable.writerow([])
 
+                # Initialize xbox 360 table
                 self.writeToXbox360Table.writerow(['Xbox 360 Table'])
                 self.writeToXbox360Table.writerow(headerList)
-                currentTable = 'Xbox-360'
 
             else:
 
-                i = 0
+                itemNumber = 0
                 for item in gameData:
 
-                    if i == 3:
+                    # Breaks before writing 'Notes' column to list
+                    if itemNumber == 3:
                         break
+
                     else:
                         gameDataList.append(item.text)
-                    i += 1
+                    itemNumber += 1
             
-            if gameDataList == []:
-                continue
+            self.writeToTable(gameDataList)
 
-            else:
-                if currentTable == 'Xbox-One':
-                    self.writeToXboxOneTable.writerow(gameDataList)
-                
-                elif currentTable == 'Xbox-360':
-                    self.writeToXbox360Table.writerow(gameDataList)
+    def writeToTable(self, gameData):
 
-            num += 1
+        if self.currentTable == 'Xbox-One':
+            self.writeToXboxOneTable.writerow(gameData)
         
-        # csvHandler.main()
+        else:
+            self.writeToXbox360Table.writerow(gameData)
+        
 
 class TrueAchievementsScrape:
     pass
@@ -281,5 +318,5 @@ class HowLongToBeatScrape:
 if __name__ == '__main__':
     MajorNelsonScrape()
     csvHandler.main()
-    DWG_BOT.main()
+    # DWG_BOT.main()
     print('\nSuccess!')
