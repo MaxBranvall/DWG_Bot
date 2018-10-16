@@ -318,5 +318,5 @@ class HowLongToBeatScrape:
 if __name__ == '__main__':
     MajorNelsonScrape()
     csvHandler.main()
-    # DWG_BOT.main()
+    DWG_BOT.main()
     print('\nSuccess!')
