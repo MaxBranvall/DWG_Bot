@@ -45,7 +45,7 @@ def sortLists(xOneList, x360List):
     openXboxOne.close()
     openXbox360.close()
 
-    # scraper.Utility.getGamePrice()
+    scraper.Utility.getGamePrice()
     # csvToMdTable.main()
 
 if __name__ == '__main__':
