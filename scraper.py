@@ -21,9 +21,9 @@ finalXbox360TablePath = 'csvAndMarkDown/csvFiles/finalXbox360Table.csv'
 header = { 'USER-AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36'}
 testHeader = {'USER-AGENT' : 'TestBot'}
 
-majNelsonURL = 'https://majornelson.com/2018/10/08/this-weeks-deals-with-gold-and-spotlight-sale-135/'
+majNelsonURL = 'https://majornelson.com/2018/10/15/this-weeks-deals-with-gold-and-spotlight-sale-136/'
 trueAchievementsURL = 'https://www.trueachievements.com/game/'
-testUrl = 'rawhtml.html'
+testUrl = 'week2.html'
 
 # Debugging
 breakForDebug = 100
@@ -144,8 +144,13 @@ class Utility:
 
             storePageSoup = Utility.requestWebPage(mode='getPrice', href=href)
 
-            discountedPrice = storePageSoup.find('span', {'class': 'GoldPrice ProductPrice'})
-            discountedPrice = discountedPrice.text
+            try:
+                discountedPrice = storePageSoup.find('span', {'class': 'GoldPrice ProductPrice'})
+                discountedPrice = discountedPrice.text
+            
+            except AttributeError:
+                discountedPrice = storePageSoup.find('span', {'class': 'SilverPrice ProductPrice'})
+                discountedPrice = discountedPrice.text
 
             xbox360PriceList.append(f'[{discountedPrice}]({href})')
             print(f'(X360) Retrieved price: {priceIterationNumber}!')
@@ -155,7 +160,7 @@ class Utility:
     
     def xboxOneFiles():
 
-        openXboxOne = open('finalXboxOneTable.csv', 'w')
+        openXboxOne = open(finalXboxOneTablePath, 'w')
         writeToXboxOne = csv.writer(openXboxOne)
         readFromXboxOne = csv.reader(open(xboxOneTablePath, 'r'))
 
@@ -163,7 +168,7 @@ class Utility:
 
     def xbox360Files():
 
-        openXbox360 = open('finalXbox360Table.csv', 'w')
+        openXbox360 = open(finalXbox360TablePath, 'w')
         writeToXbox360 = csv.writer(openXbox360)
         readFromXbox360 = csv.reader(open(xbox360TablePath, 'r'))
 

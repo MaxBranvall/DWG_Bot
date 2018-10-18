@@ -8,6 +8,8 @@
 
 ^(This will be your one stop shop for Deals with Gold each week!)
 
+Disclaimer: I will probably have bugs, please [notify me](https://www.reddit.com/message/compose/?to=stratcat22) if you happen to catch any. Thanks so much!
+
 ---
 Have any questions, comments, concerns, suggestions, jokes, memes?
 -

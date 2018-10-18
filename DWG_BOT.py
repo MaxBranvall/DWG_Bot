@@ -5,7 +5,7 @@ import scraper
 
 def main():
 
-    mdTablePath = 'csvAndMarkDown/markDownFiles/testFinish.md'
+    mdTablePath = 'csvAndMarkDown/markDownFiles/markdownTable.md'
     endOfPostPath = 'csvAndMarkDown/markDownFiles/endOfPost.md'
 
     with open(mdTablePath, 'r') as x:
@@ -16,7 +16,10 @@ def main():
 
     redditInstance = praw.Reddit('dwgBot')
 
-    testSub = redditInstance.subreddit('test')
+    testSub = redditInstance.subreddit('XboxOne')
 
-    testSub.submit('Final Test', selftext= mainPost + ending)
+    testSub.submit('This Weeks Deals with Gold and Spotlight Sale! Formatted for Easy Reading!', selftext= mainPost + ending)
     print('\nSubmitted!')
+
+if __name__ == '__main__':
+    main()
