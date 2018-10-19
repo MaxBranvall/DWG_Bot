@@ -1,4 +1,5 @@
-import csv, scraper, csvToMdTable
+import csv 
+import scraper, csvToMdTable
 
 openXboxOne = open(scraper.xboxOneTablePath, 'w')
 openXbox360 = open(scraper.xbox360TablePath, 'w')

@@ -1,7 +1,10 @@
 import requests, csv
-import csvHandler, csvToMdTable, DWG_BOT
+import csvHandler, DWG_BOT
 from collections import OrderedDict
+from time import time
 from bs4 import BeautifulSoup
+
+startTime = time()
 
 initialDictionary = {}
 xboxOneDictionary = {}
@@ -23,10 +26,10 @@ testHeader = {'USER-AGENT' : 'TestBot'}
 
 majNelsonURL = 'https://majornelson.com/2018/10/15/this-weeks-deals-with-gold-and-spotlight-sale-136/'
 trueAchievementsURL = 'https://www.trueachievements.com/game/'
-testUrl = 'week2.html'
+testUrl = 'html/week2.html'
 
 # Debugging
-breakForDebug = 100
+breakForDebug = 500
 debugMode = False
 
 class Utility:
@@ -39,19 +42,19 @@ class Utility:
 
         if mode == 'getPrice':
             getStorePage = requests.get(href, headers= header)
-            storePageSoup = BeautifulSoup(getStorePage.text, 'html.parser')
+            storePageSoup = BeautifulSoup(getStorePage.text, 'html5lib')
             return storePageSoup            
 
         else:
             if debugMode == True:
                 x = open(testUrl, 'r')
-                nelsonSoup = BeautifulSoup(x, 'html.parser')
+                nelsonSoup = BeautifulSoup(x, 'html5lib')
                 return nelsonSoup
 
             else:
                 x = requests.get(majNelsonURL, headers= {'USER-AGENT': 'Mozilla 5.0'})
                 print(f'Status Code: {x}')
-                nelsonSoup = BeautifulSoup(x.text, 'html.parser')
+                nelsonSoup = BeautifulSoup(x.text, 'html5lib')
                 return nelsonSoup
 
     def getGamePrice():
@@ -124,7 +127,11 @@ class Utility:
 
             for keyword in removeFromPrice:
                 if keyword in discountedPrice:
-                    discountedPrice.remove(keyword) 
+                    discountedPrice.remove(keyword)
+
+            if discountedPrice[0] == 'Included':
+                discountedPrice = storePageSoup.find_all('span', {'class': 'price-disclaimer'})
+                discountedPrice = [discountedPrice[0].text]
 
             xboxOnePriceList.append(f'[{discountedPrice[0]}]({href})')
             print(f'(X1) Retrieved price: {priceIterationNumber}!')
@@ -324,4 +331,5 @@ if __name__ == '__main__':
     MajorNelsonScrape()
     csvHandler.main()
     DWG_BOT.main()
-    print('\nSuccess!')
+    print(f'\nTime elapsed:{time() - startTime}')
+    print('Success!')
