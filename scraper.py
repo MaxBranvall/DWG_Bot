@@ -21,8 +21,8 @@ xbox360TablePath = 'csvAndMarkDown/csvFiles/xbox360Table.csv'
 finalXboxOneTablePath = 'csvAndMarkDown/csvFiles/finalXboxOneTable.csv'
 finalXbox360TablePath = 'csvAndMarkDown/csvFiles/finalXbox360Table.csv'
 
-header = { 'USER-AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36'}
-testHeader = {'USER-AGENT' : 'TestBot'}
+header = {'USER-AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36'}
+testHeader = {'USER-AGENT': 'TestBot'}
 
 majNelsonURL = 'https://majornelson.com/2018/10/15/this-weeks-deals-with-gold-and-spotlight-sale-136/'
 trueAchievementsURL = 'https://www.trueachievements.com/game/'
@@ -32,10 +32,11 @@ testUrl = 'html/week2.html'
 breakForDebug = 500
 debugMode = False
 
+
 class Utility:
 
     def clearFile(filePath):
-        with open(filePath, 'w') as foo:
+        with open(filePath, 'w'):
             pass
 
     def requestWebPage(mode=None, href=None):
@@ -43,7 +44,7 @@ class Utility:
         if mode == 'getPrice':
             getStorePage = requests.get(href, headers= header)
             storePageSoup = BeautifulSoup(getStorePage.text, 'html5lib')
-            return storePageSoup            
+            return storePageSoup       
 
         else:
             if debugMode == True:
@@ -52,7 +53,7 @@ class Utility:
                 return nelsonSoup
 
             else:
-                x = requests.get(majNelsonURL, headers= {'USER-AGENT': 'Mozilla 5.0'})
+                x = requests.get(majNelsonURL, headers={'USER-AGENT': 'Mozilla 5.0'})
                 print(f'Status Code: {x}')
                 nelsonSoup = BeautifulSoup(x.text, 'html5lib')
                 return nelsonSoup
@@ -106,7 +107,7 @@ class Utility:
         return sortedXboxOneDict, sortedXbox360Dict
 
     def getXboxOnePrices(xboxOneDict):
-    
+
         debugLoopBreak = 0
         priceIterationNumber = 0
 
@@ -114,7 +115,7 @@ class Utility:
 
             if debugLoopBreak == breakForDebug:
                 break
-            
+
             storePageSoup = Utility.requestWebPage(mode='getPrice', href=href)
 
             try:
@@ -138,7 +139,7 @@ class Utility:
 
             priceIterationNumber += 1
             debugLoopBreak += 1
-    
+
     def getXbox360Prices(xbox360Dict):
 
         debugLoopBreak = 0
@@ -154,7 +155,7 @@ class Utility:
             try:
                 discountedPrice = storePageSoup.find('span', {'class': 'GoldPrice ProductPrice'})
                 discountedPrice = discountedPrice.text
-            
+
             except AttributeError:
                 discountedPrice = storePageSoup.find('span', {'class': 'SilverPrice ProductPrice'})
                 discountedPrice = discountedPrice.text
@@ -164,7 +165,7 @@ class Utility:
 
             priceIterationNumber += 1
             debugLoopBreak += 1
-    
+
     def xboxOneFiles():
 
         openXboxOne = open(finalXboxOneTablePath, 'w')
@@ -182,7 +183,7 @@ class Utility:
         return openXbox360, writeToXbox360, readFromXbox360
 
     def addPricesToXboxOneTable(readFromXboxOne, writeToXboxOne):
-        
+
         debugLoopBreak = 0
         lineNumber = 0
         priceIndexNumber = 0
@@ -198,7 +199,7 @@ class Utility:
             else:
                 # For each price in the priceList, assign price to last index of each line
                 line[-1] = xboxOnePriceList[priceIndexNumber]
-            
+
                 priceIndexNumber += 1
             lineNumber += 1
             debugLoopBreak += 1
@@ -218,7 +219,7 @@ class Utility:
 
             if lineNumber == 0 or lineNumber == 1:
                 pass
-            
+
             else:
                 # For each price in the priceList, assign price to last index of each line
                 line[-1] = xbox360PriceList[priceIndexNumber]
@@ -228,6 +229,7 @@ class Utility:
             debugLoopBreak += 1
 
             writeToXbox360.writerow(line)
+
 
 class MajorNelsonScrape:
 
@@ -250,7 +252,7 @@ class MajorNelsonScrape:
     def getTableHeaders(self):
 
         headerNumber = 0
-        
+
         for row in self.nelsonSoup.find_all('tr'):
 
             headerList.clear()
@@ -278,7 +280,7 @@ class MajorNelsonScrape:
         # Initialize xbox one table
         self.writeToXboxOneTable.writerow(['Xbox One Table'])
         self.writeToXboxOneTable.writerow(headerList)
-        
+
         for row in self.nelsonSoup.find_all('tr')[1:]:
 
             # Clear list on each iteration to prevent dupe writing
@@ -309,20 +311,21 @@ class MajorNelsonScrape:
                     else:
                         gameDataList.append(item.text)
                     itemNumber += 1
-            
+
             self.writeToTable(gameDataList)
 
     def writeToTable(self, gameData):
 
         if self.currentTable == 'Xbox-One':
             self.writeToXboxOneTable.writerow(gameData)
-        
+
         else:
             self.writeToXbox360Table.writerow(gameData)
-        
+
 
 class TrueAchievementsScrape:
     pass
+
 
 class HowLongToBeatScrape:
     pass
@@ -331,5 +334,5 @@ if __name__ == '__main__':
     MajorNelsonScrape()
     csvHandler.main()
     DWG_BOT.main()
-    print(f'\nTime elapsed:{time() - startTime}')
+    print(f'\nTime elapsed: {time() - startTime}')
     print('Success!')
