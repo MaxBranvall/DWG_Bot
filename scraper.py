@@ -6,6 +6,9 @@ from bs4 import BeautifulSoup
 
 startTime = time()
 
+date = '2018/10/15'
+saleNumber = '136'
+
 initialDictionary = {}
 xboxOneDictionary = {}
 xbox360Dictionary = {}
@@ -24,7 +27,7 @@ finalXbox360TablePath = 'csvAndMarkDown/csvFiles/finalXbox360Table.csv'
 header = {'USER-AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36'}
 testHeader = {'USER-AGENT': 'TestBot'}
 
-majNelsonURL = 'https://majornelson.com/2018/10/15/this-weeks-deals-with-gold-and-spotlight-sale-136/'
+majNelsonURL = (f'https://majornelson.com/{date}/this-weeks-deals-with-gold-and-spotlight-sale-{saleNumber}/')
 trueAchievementsURL = 'https://www.trueachievements.com/game/'
 testUrl = 'html/week2.html'
 
@@ -44,7 +47,7 @@ class Utility:
         if mode == 'getPrice':
             getStorePage = requests.get(href, headers= header)
             storePageSoup = BeautifulSoup(getStorePage.text, 'html5lib')
-            return storePageSoup       
+            return storePageSoup
 
         else:
             if debugMode == True:
@@ -261,7 +264,7 @@ class MajorNelsonScrape:
             for header in tableHeaders:
 
                 # Stops 'Notes' header from being added to the table
-                if headerNumber == 3: 
+                if headerNumber == 3:
                     break
 
                 else:
