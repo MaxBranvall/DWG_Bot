@@ -14,9 +14,9 @@ def main():
 
     redditInstance = praw.Reddit('dwgBot')
 
-    testSub = redditInstance.subreddit('XboxOne')
+    testSub = redditInstance.subreddit('Test')
 
-    testSub.submit('This Weeks Deals with Gold and Spotlight Sale! Formatted for Easy Reading!', selftext= mainPost + ending)
+    testSub.submit('This is a test run!', selftext= mainPost + ending)
     print('\nSubmitted!')
 
 if __name__ == '__main__':
