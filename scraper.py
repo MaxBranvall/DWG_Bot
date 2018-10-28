@@ -29,11 +29,11 @@ testHeader = {'USER-AGENT': 'TestBot'}
 
 majNelsonURL = (f'https://majornelson.com/{date}/this-weeks-deals-with-gold-and-spotlight-sale-{saleNumber}/')
 trueAchievementsURL = 'https://www.trueachievements.com/game/'
-testUrl = 'html/week2.html'
+testUrl = 'html/week3.html'
 
 # Debugging
 breakForDebug = 500
-debugMode = False
+debugMode = True
 
 
 class Utility:
@@ -90,19 +90,35 @@ class Utility:
 
             # if the text has been added to the dict, pass, if not, add the game name with its href
             else:
-                if anchorTag.text not in initialDictionary.keys():
-                    initialDictionary[anchorTag.text] = anchorTag['href']
-                else:
+
+                try:
+                    if 'microsoft' in anchorTag['href']:
+
+                        if anchorTag.text not in xboxOneDictionary.keys():
+
+                            try:
+                                xboxOneDictionary[anchorTag.text] = anchorTag['href']
+
+                            except KeyError:
+                                pass
+
+                    elif 'microsoft' not in anchorTag['href']:
+
+                        if anchorTag.text not in xbox360Dictionary.keys():
+
+                            try:
+                                xbox360Dictionary[anchorTag.text] = anchorTag['href']
+
+                            except KeyError:
+                                pass
+
+                    else:
+                        pass
+
+                except KeyError:
                     pass
 
     def sortDictionaries():
-
-        for game, href in initialDictionary.items():
-
-            if 'microsoft' not in href:
-                xbox360Dictionary[game] = href
-            else:
-                xboxOneDictionary[game] = href
 
         sortedXboxOneDict = OrderedDict(sorted(xboxOneDictionary.items()))
         sortedXbox360Dict = OrderedDict(sorted(xbox360Dictionary.items()))
@@ -138,6 +154,7 @@ class Utility:
                 discountedPrice = [discountedPrice[0].text]
 
             xboxOnePriceList.append(f'[{discountedPrice[0]}]({href})')
+            print(href)
             print(f'(X1) Retrieved price: {priceIterationNumber}!')
 
             priceIterationNumber += 1
@@ -336,6 +353,6 @@ class HowLongToBeatScrape:
 if __name__ == '__main__':
     MajorNelsonScrape()
     csvHandler.main()
-    DWG_BOT.main()
+    # DWG_BOT.main()
     print(f'\nTime elapsed: {time() - startTime}')
     print('Success!')
