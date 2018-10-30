@@ -1,4 +1,4 @@
-import csv 
+import csv
 import scraper, csvToMdTable
 
 openXboxOne = open(scraper.xboxOneTablePath, 'w')
@@ -17,7 +17,7 @@ def main():
 
     for row in readXboxOne:
         xboxOneList.append(row)
-    
+
     for row in readXbox360:
         xbox360List.append(row)
 

@@ -9,7 +9,6 @@ startTime = time()
 date = '2018/10/15'
 saleNumber = '136'
 
-initialDictionary = {}
 xboxOneDictionary = {}
 xbox360Dictionary = {}
 
@@ -29,11 +28,11 @@ testHeader = {'USER-AGENT': 'TestBot'}
 
 majNelsonURL = (f'https://majornelson.com/{date}/this-weeks-deals-with-gold-and-spotlight-sale-{saleNumber}/')
 trueAchievementsURL = 'https://www.trueachievements.com/game/'
-testUrl = 'html/week2.html'
+testUrl = 'html/week3.html'
 
 # Debugging
 breakForDebug = 500
-debugMode = False
+debugMode = True
 
 
 class Utility:
@@ -90,19 +89,36 @@ class Utility:
 
             # if the text has been added to the dict, pass, if not, add the game name with its href
             else:
-                if anchorTag.text not in initialDictionary.keys():
-                    initialDictionary[anchorTag.text] = anchorTag['href']
-                else:
-                    pass
+
+                try:
+                    if 'microsoft' in anchorTag['href']:
+
+                        if anchorTag.text not in xboxOneDictionary.keys():
+
+                            try:
+                                xboxOneDictionary[anchorTag.text] = anchorTag['href']
+
+                            except KeyError:
+                                pass
+
+                    elif 'microsoft' not in anchorTag['href']:
+
+                        if anchorTag.text not in xbox360Dictionary.keys():
+
+                            try:
+                                xbox360Dictionary[anchorTag.text] = anchorTag['href']
+
+                            except KeyError:
+                                pass
+
+                    else:
+                        pass
+
+                # If there is no href for the entry, set it's price to null
+                except KeyError:
+                    xboxOneDictionary[anchorTag.text] = 'null'
 
     def sortDictionaries():
-
-        for game, href in initialDictionary.items():
-
-            if 'microsoft' not in href:
-                xbox360Dictionary[game] = href
-            else:
-                xboxOneDictionary[game] = href
 
         sortedXboxOneDict = OrderedDict(sorted(xboxOneDictionary.items()))
         sortedXbox360Dict = OrderedDict(sorted(xbox360Dictionary.items()))
@@ -119,26 +135,50 @@ class Utility:
             if debugLoopBreak == breakForDebug:
                 break
 
-            storePageSoup = Utility.requestWebPage(mode='getPrice', href=href)
+            if href == 'null':
+                xboxOnePriceList.append('null')
+                print(f'(X1) Retrieved price: {priceIterationNumber}!')
 
-            try:
-                discountedPrice = storePageSoup.find('div', {'class': 'remediation-cta-label'})
-                discountedPrice = discountedPrice.text.split()
+            else:
 
-            except AttributeError:
-                discountedPrice = storePageSoup.find('span', {'class': 'price-disclaimer'})
-                discountedPrice = discountedPrice.find('span').text.split()
+                storePageSoup = Utility.requestWebPage(mode='getPrice', href=href)
 
-            for keyword in removeFromPrice:
-                if keyword in discountedPrice:
-                    discountedPrice.remove(keyword)
+                try:
+                    discountedPrice = storePageSoup.find('div', {'class': 'remediation-cta-label'})
+                    discountedPrice = discountedPrice.text.split()
 
-            if discountedPrice[0] == 'Included':
-                discountedPrice = storePageSoup.find_all('span', {'class': 'price-disclaimer'})
-                discountedPrice = [discountedPrice[0].text]
+                except AttributeError:
 
-            xboxOnePriceList.append(f'[{discountedPrice[0]}]({href})')
-            print(f'(X1) Retrieved price: {priceIterationNumber}!')
+                    try:
+                        discountedPrice = storePageSoup.find('span', {'class': 'price-disclaimer'})
+                        discountedPrice = discountedPrice.find('span').text.split()
+
+                    except AttributeError:
+                        discountedPrice = storePageSoup.find('div', {'class': 'pi-price-text'})
+                        discountedPrice = discountedPrice.find('span').text.split()
+
+                for keyword in removeFromPrice:
+                    if keyword in discountedPrice:
+                        discountedPrice.remove(keyword)
+
+                if discountedPrice[0] == 'Included':
+                    discountedPrice = storePageSoup.find_all('span', {'class': 'price-disclaimer'})
+                    discountedPrice = [discountedPrice[0].text]
+
+                elif discountedPrice[0] == 'Free':
+                    try:
+                        discountedPrice = storePageSoup.find('div', {'class': 'pi-price-text'})
+                        discountedPrice = discountedPrice.find('span').text.split()
+
+                        if discountedPrice == []:
+                            raise AttributeError
+
+                    except AttributeError:
+                        discountedPrice = storePageSoup.find('span', {'class': 'price-disclaimer'})
+                        discountedPrice = discountedPrice.find('span').text.split()
+
+                xboxOnePriceList.append(f'[{discountedPrice[0]}]({href})')
+                print(f'(X1) Retrieved price: {priceIterationNumber}!')
 
             priceIterationNumber += 1
             debugLoopBreak += 1
@@ -201,9 +241,14 @@ class Utility:
 
             else:
                 # For each price in the priceList, assign price to last index of each line
-                line[-1] = xboxOnePriceList[priceIndexNumber]
+                if xboxOnePriceList[priceIndexNumber] == 'null':
+                    pass
+
+                else:
+                    line[-1] = xboxOnePriceList[priceIndexNumber]
 
                 priceIndexNumber += 1
+
             lineNumber += 1
             debugLoopBreak += 1
 
@@ -225,7 +270,11 @@ class Utility:
 
             else:
                 # For each price in the priceList, assign price to last index of each line
-                line[-1] = xbox360PriceList[priceIndexNumber]
+                try:
+                    line[-1] = xbox360PriceList[priceIndexNumber]
+
+                except IndexError:
+                    break
 
                 priceIndexNumber += 1
             lineNumber += 1

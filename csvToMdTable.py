@@ -15,7 +15,7 @@ def main(mdFile=None):
         mdFilePath = (f'csvAndMarkDown/markDownFiles/testFinish.md')
         with open(mdFilePath, 'w'):
             pass
-    
+
     else:
         mdFileName = ('markdownTable.md')
         mdFilePath = (f'csvAndMarkDown/markDownFiles/{mdFileName}')
@@ -27,7 +27,7 @@ def main(mdFile=None):
     with open(mdFilePath, 'w') as mdTable:
 
         line = 0
-    
+
         for row in readXboxOne:
 
             try:
@@ -35,13 +35,13 @@ def main(mdFile=None):
 
                 if line == 1:
                     mdTable.write(horizontal)
-            
+
             # This will be run for the title of the table
             except IndexError:
                 mdTable.write(f'\n{row[0]}\n\n')
 
             line += 1
-        
+
         line = 0
 
         for row in readXbox360:
@@ -54,7 +54,7 @@ def main(mdFile=None):
 
                 if line == 1:
                     mdTable.write(horizontal)
-            
+
             # Run for the title of the table
             except IndexError:
                 mdTable.write(f'\n{row[0]}\n\n')
