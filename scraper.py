@@ -386,5 +386,7 @@ if __name__ == '__main__':
     MajorNelsonScrape()
     csvHandler.main()
     DWG_BOT.main()
-    print(f'\nTime elapsed: {time() - startTime}')
+    endTime = time()
+    endTime = (float(f'{(endTime - startTime) / 60}'))
+    print(f'\nTime elapsed: {endTime:.2f}')
     print('Success!')
