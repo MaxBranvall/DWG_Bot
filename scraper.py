@@ -6,8 +6,8 @@ from bs4 import BeautifulSoup
 
 startTime = time()
 
-date = '2018/10/15'
-saleNumber = '136'
+date = '2018/10/29'
+saleNumber = '137'
 
 xboxOneDictionary = {}
 xbox360Dictionary = {}
@@ -32,7 +32,7 @@ testUrl = 'html/week3.html'
 
 # Debugging
 breakForDebug = 500
-debugMode = True
+debugMode = False
 
 
 class Utility:
@@ -122,6 +122,11 @@ class Utility:
 
         sortedXboxOneDict = OrderedDict(sorted(xboxOneDictionary.items()))
         sortedXbox360Dict = OrderedDict(sorted(xbox360Dictionary.items()))
+
+        print('Xbox One')
+        print(len(sortedXboxOneDict.keys()))
+        print('Xbox 360')
+        print(len(sortedXbox360Dict.keys()))
 
         return sortedXboxOneDict, sortedXbox360Dict
 
