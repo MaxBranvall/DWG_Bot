@@ -6,8 +6,8 @@ from bs4 import BeautifulSoup
 
 startTime = time()
 
-date = '2018/10/29'
-saleNumber = '137'
+date = '2018/11/05'
+saleNumber = '138'
 
 xboxOneDictionary = {}
 xbox360Dictionary = {}
@@ -385,6 +385,9 @@ class TrueAchievementsScrape:
 
 
 class HowLongToBeatScrape:
+    pass
+
+class MetaCriticScrape:
     pass
 
 if __name__ == '__main__':

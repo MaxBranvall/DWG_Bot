@@ -7,7 +7,7 @@ A plus sign (+) specifies that the title offers in-app purchases.
 
 ---
 
-[Link to Major Nelson's website](https://majornelson.com/2018/10/29/this-weeks-deals-with-gold-and-spotlight-sale-137/)
+[Link to Major Nelson's website](https://majornelson.com/2018/11/05/this-weeks-deals-with-gold-and-spotlight-sale-138/)
 
 ---
 -
@@ -26,7 +26,7 @@ Have any questions, comments, concerns, suggestions, jokes, memes?
 -
 ---
 
-Big shoutout to u/mal68 for suggesting the creation of this bot!
+Big shoutout to /u/mal68 for suggesting the creation of this bot!
 -
 ---
 
