@@ -67,13 +67,13 @@ class Utility:
         Utility.processAnchorTags(nelsonSoup)
         xboxOneDict, xbox360Dict = Utility.sortDictionaries()
 
+        openXboxOne, writeToXboxOne, readFromXboxOne = Utility.xboxOneFiles()
+        openXbox360, writeToXbox360, readFromXbox360 = Utility.xbox360Files()
+
         # handleBundles
 
         Utility.getXboxOnePrices(xboxOneDict)
         Utility.getXbox360Prices(xbox360Dict)
-
-        openXboxOne, writeToXboxOne, readFromXboxOne = Utility.xboxOneFiles()
-        openXbox360, writeToXbox360, readFromXbox360 = Utility.xbox360Files()
 
         Utility.addPricesToXboxOneTable(readFromXboxOne, writeToXboxOne)
         Utility.addPricesToXbox360Table(readFromXbox360, writeToXbox360)
@@ -134,10 +134,21 @@ class Utility:
 
     # def handleBundles():
         # for game, href in xboxOneDict.items():
-        #   add game with href to a new dict
         #   check if bundle
-        #   if bundle add bundle titles with 'null' hrefs to dict
-        #   return dicts
+        #   if it is add 'game title *includes:*' for key and href for value to new dict
+        #   add bundled games with following format '* game title' for key and 'null' for value
+        #   if not add game and href to new dict
+        #   write to a new csv. For bundled write (['game','bundled','null'])
+        #
+        # csv.reader(readfrom xb1table.csv)
+        # for line in csv:
+        #   if line[1] != bundled:
+        #       line[1] == readLines[iterable][1]
+        #       line[-1] == readlines[iterable][-1]
+        #       iterable += 1
+        #   else:
+        #       game is bundled
+        # return dicts
 
     def getXboxOnePrices(xboxOneDict):
 
