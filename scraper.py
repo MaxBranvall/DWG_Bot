@@ -31,8 +31,8 @@ trueAchievementsURL = 'https://www.trueachievements.com/game/'
 testUrl = 'html/week3.html'
 
 # Debugging
-breakForDebug = 500
-debugMode = False
+breakForDebug = 5
+debugMode = True
 
 
 class Utility:
@@ -66,6 +66,8 @@ class Utility:
 
         Utility.processAnchorTags(nelsonSoup)
         xboxOneDict, xbox360Dict = Utility.sortDictionaries()
+
+        # handleBundles
 
         Utility.getXboxOnePrices(xboxOneDict)
         Utility.getXbox360Prices(xbox360Dict)
@@ -129,6 +131,13 @@ class Utility:
         print(len(sortedXbox360Dict.keys()))
 
         return sortedXboxOneDict, sortedXbox360Dict
+
+    # def handleBundles():
+        # for game, href in xboxOneDict.items():
+        #   add game with href to a new dict
+        #   check if bundle
+        #   if bundle add bundle titles with 'null' hrefs to dict
+        #   return dicts
 
     def getXboxOnePrices(xboxOneDict):
 
@@ -383,7 +392,6 @@ class MajorNelsonScrape:
 class TrueAchievementsScrape:
     pass
 
-
 class HowLongToBeatScrape:
     pass
 
@@ -393,7 +401,7 @@ class MetaCriticScrape:
 if __name__ == '__main__':
     MajorNelsonScrape()
     csvHandler.main()
-    DWG_BOT.main()
+    # DWG_BOT.main()
     endTime = time()
     endTime = (float(f'{(endTime - startTime) / 60}'))
     print(f'\nTime elapsed: {endTime:.2f}')
