@@ -79,11 +79,11 @@ class Utility:
 
         xboxOneBundledDict = Utility.handleXboxOneBundle(readFromXboxOne, xboxOneDict)
 
-        # Utility.getXboxOnePrices(xboxOneBundledDict)
-        # Utility.getXbox360Prices(xbox360Dict)
+        Utility.getXboxOnePrices(xboxOneBundledDict)
+        Utility.getXbox360Prices(xbox360Dict)
 
-        # Utility.addPricesToXboxOneTable(readFromBundledXboxOne, writeToXboxOne)
-        # Utility.addPricesToXbox360Table(readFromXbox360, writeToXbox360)
+        Utility.addPricesToXboxOneTable(readFromBundledXboxOne, writeToXboxOne)
+        Utility.addPricesToXbox360Table(readFromXbox360, writeToXbox360)
 
         openXboxOne.close()
         openXbox360.close()
@@ -208,9 +208,8 @@ class Utility:
             debugLoopBreak += 1
             lineNumber += 1
 
-        print(xboxOneBundledDict)
-        return xboxOneBundledDict
         openBTable.close()
+        return xboxOneBundledDict
 
     def getXboxOnePrices(xboxOneDict):
 
@@ -295,6 +294,7 @@ class Utility:
                 discountedPrice = discountedPrice.text
 
             xbox360PriceList.append(f'[{discountedPrice}]({href})')
+            print(discountedPrice)
             print(f'(X360) Retrieved price: {priceIterationNumber}!')
 
             priceIterationNumber += 1
@@ -333,20 +333,15 @@ class Utility:
 
             else:
                 # For each price in the priceList, assign price to last index of each line
-                if xboxOnePriceList[priceIndexNumber] == 'null':
-                    lineNumber += 1
-                    pass
-
-                elif xboxOnePriceList[priceIndexNumber] == 'bundled':
+                if xboxOnePriceList[priceIndexNumber] == 'null' or xboxOnePriceList[priceIndexNumber] == 'bundled':
                     pass
 
                 else:
                     line[-1] = xboxOnePriceList[priceIndexNumber]
-                    lineNumber += 1
 
                 priceIndexNumber += 1
 
-            # lineNumber += 1
+            lineNumber += 1
             debugLoopBreak += 1
 
             writeToXboxOne.writerow(line)
