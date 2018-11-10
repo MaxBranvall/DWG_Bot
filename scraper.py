@@ -6,10 +6,13 @@ from bs4 import BeautifulSoup
 
 startTime = time()
 
+bundle = False
+
 date = '2018/11/05'
 saleNumber = '138'
 
 xboxOneDictionary = {}
+xboxOneBundledDict = {}
 xbox360Dictionary = {}
 
 headerList = []
@@ -18,8 +21,12 @@ xboxOnePriceList = []
 xbox360PriceList = []
 removeFromPrice = ['with', 'Xbox', 'Live', 'Gold']
 
+xboxOneBundleTablePath = 'csvAndMarkDown/csvFiles/xboxOneBundleTable.csv'
+# xbox360BundleTablePath = 'csvAndMarkDown/csvFiles/xbox360BundleTable.csv'
+
 xboxOneTablePath = 'csvAndMarkDown/csvFiles/xboxOneTable.csv'
 xbox360TablePath = 'csvAndMarkDown/csvFiles/xbox360Table.csv'
+
 finalXboxOneTablePath = 'csvAndMarkDown/csvFiles/finalXboxOneTable.csv'
 finalXbox360TablePath = 'csvAndMarkDown/csvFiles/finalXbox360Table.csv'
 
@@ -28,10 +35,10 @@ testHeader = {'USER-AGENT': 'TestBot'}
 
 majNelsonURL = (f'https://majornelson.com/{date}/this-weeks-deals-with-gold-and-spotlight-sale-{saleNumber}/')
 trueAchievementsURL = 'https://www.trueachievements.com/game/'
-testUrl = 'html/week3.html'
+testUrl = 'html/week5.html'
 
 # Debugging
-breakForDebug = 5
+breakForDebug = 10
 debugMode = True
 
 
@@ -67,16 +74,16 @@ class Utility:
         Utility.processAnchorTags(nelsonSoup)
         xboxOneDict, xbox360Dict = Utility.sortDictionaries()
 
-        openXboxOne, writeToXboxOne, readFromXboxOne = Utility.xboxOneFiles()
+        openXboxOne, writeToXboxOne, readFromXboxOne, readFromBundledXboxOne = Utility.xboxOneFiles()
         openXbox360, writeToXbox360, readFromXbox360 = Utility.xbox360Files()
 
-        # handleBundles
+        xboxOneBundledDict = Utility.handleXboxOneBundle(readFromXboxOne, xboxOneDict)
 
-        Utility.getXboxOnePrices(xboxOneDict)
-        Utility.getXbox360Prices(xbox360Dict)
+        # Utility.getXboxOnePrices(xboxOneBundledDict)
+        # Utility.getXbox360Prices(xbox360Dict)
 
-        Utility.addPricesToXboxOneTable(readFromXboxOne, writeToXboxOne)
-        Utility.addPricesToXbox360Table(readFromXbox360, writeToXbox360)
+        # Utility.addPricesToXboxOneTable(readFromBundledXboxOne, writeToXboxOne)
+        # Utility.addPricesToXbox360Table(readFromXbox360, writeToXbox360)
 
         openXboxOne.close()
         openXbox360.close()
@@ -132,23 +139,78 @@ class Utility:
 
         return sortedXboxOneDict, sortedXbox360Dict
 
-    # def handleBundles():
-        # for game, href in xboxOneDict.items():
-        #   check if bundle
-        #   if it is add 'game title *includes:*' for key and href for value to new dict
-        #   add bundled games with following format '* game title' for key and 'null' for value
-        #   if not add game and href to new dict
-        #   write to a new csv. For bundled write (['game','bundled','null'])
-        #
-        # csv.reader(readfrom xb1table.csv)
-        # for line in csv:
-        #   if line[1] != bundled:
-        #       line[1] == readLines[iterable][1]
-        #       line[-1] == readlines[iterable][-1]
-        #       iterable += 1
-        #   else:
-        #       game is bundled
-        # return dicts
+    def checkIfBundle(soup):
+
+        headings = soup.find_all('h2', {'class': 'c-heading-4'})
+
+        n = 0
+
+        for head in headings:
+            if (head.text.split() == ['In', 'this', 'bundle']):
+                print('bundle')
+                return True
+            elif(n > 2 and head.text.split() != ['In', 'this', 'bundle']):
+                return False
+
+            n += 1
+
+    def handleXboxOneBundle(readFromXboxOne, xboxOneDict):
+
+        lines = list(readFromXboxOne)
+        openBTable = open(xboxOneBundleTablePath, 'w')
+        writeToBundleTable = csv.writer(openBTable)
+        lineNumber = 2
+        debugLoopBreak = 0
+        xboxOneBundledDict = {}
+
+        writeToBundleTable.writerow(lines[0])
+        writeToBundleTable.writerow(lines[1])
+
+        for game, href in xboxOneDict.items():
+
+            if debugLoopBreak == breakForDebug:
+                break
+
+            getStorePage = requests.get(href, headers=header)
+            storePageSoup = BeautifulSoup(getStorePage.content, 'html5lib')
+
+            bundle = Utility.checkIfBundle(storePageSoup)
+
+            if bundle == True:
+                writeToBundleTable.writerow([f'{game} ~ Bundle includes: ', f'{lines[lineNumber][1]}', f'{lines[lineNumber][2]}'])
+                xboxOneBundledDict[game] = href
+
+                for num in range(1000): # this gets all the bundled titles
+
+                    try:
+                        y = storePageSoup.find_all('div', {'id': f'pdpbundleparts_{num}'})
+
+                        try:
+                            title = y[0].find_all('h3')[0].text
+                            writeToBundleTable.writerow([f'~ {title}', 'Bundled', 'null'])
+
+                            if (f'~ {title}' in xboxOneBundledDict.keys()):
+                                xboxOneBundledDict[f'~~ {title}'] = 'bundled'
+                            else:
+                                xboxOneBundledDict[f'~ {title}'] = 'bundled'
+
+                        except IndexError:
+                            break
+
+                    except KeyError:
+                        break
+
+            else:
+                writeToBundleTable.writerow([f'{game}', f'{lines[lineNumber][1]}', f'{lines[lineNumber][2]}'])
+                xboxOneBundledDict[game] = href
+
+            print(lineNumber, game)
+            debugLoopBreak += 1
+            lineNumber += 1
+
+        print(xboxOneBundledDict)
+        return xboxOneBundledDict
+        openBTable.close()
 
     def getXboxOnePrices(xboxOneDict):
 
@@ -162,6 +224,10 @@ class Utility:
 
             if href == 'null':
                 xboxOnePriceList.append('null')
+                print(f'(X1) Retrieved price: {priceIterationNumber}!')
+
+            elif href == 'bundled':
+                xboxOnePriceList.append('bundled')
                 print(f'(X1) Retrieved price: {priceIterationNumber}!')
 
             else:
@@ -239,8 +305,9 @@ class Utility:
         openXboxOne = open(finalXboxOneTablePath, 'w')
         writeToXboxOne = csv.writer(openXboxOne)
         readFromXboxOne = csv.reader(open(xboxOneTablePath, 'r'))
+        readFromBundledXboxOne = csv.reader(open(xboxOneBundleTablePath, 'r'))
 
-        return openXboxOne, writeToXboxOne, readFromXboxOne
+        return openXboxOne, writeToXboxOne, readFromXboxOne, readFromBundledXboxOne
 
     def xbox360Files():
 
@@ -267,14 +334,19 @@ class Utility:
             else:
                 # For each price in the priceList, assign price to last index of each line
                 if xboxOnePriceList[priceIndexNumber] == 'null':
+                    lineNumber += 1
+                    pass
+
+                elif xboxOnePriceList[priceIndexNumber] == 'bundled':
                     pass
 
                 else:
                     line[-1] = xboxOnePriceList[priceIndexNumber]
+                    lineNumber += 1
 
                 priceIndexNumber += 1
 
-            lineNumber += 1
+            # lineNumber += 1
             debugLoopBreak += 1
 
             writeToXboxOne.writerow(line)
